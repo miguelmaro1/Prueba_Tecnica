@@ -1,2 +1,2 @@
 # Prueba_Tecnica
-Repositorio de la prueba técnica para la vacante de Analista de Riego de Credito 
+Repositorio de la prueba técnica para la vacante de Analista de Riego de Crédito. El cual cuenta con las bases de datos para ser importadas, documento en R.rmd que contiene el código utilizado para el desarrollo de los puntos solicitados, no obstante, se adjunta un documento en formato PDF con el resumen del código. Por otra parte, se agrega la base de datos completa, resultante de la unión de las demás bases de datos, así mismo, la presentación con la recomendación solicitada y las graficas que la soportan.  
