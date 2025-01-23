@@ -1,0 +1,405 @@
+---
+title: "Prueba de Conocimientos - Skandia"
+author: "Miguel Angel Malagón"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r, warning=FALSE,echo=FALSE,message=FALSE}
+# Librerias
+library(readxl) #Leer la Librerias
+library(tidyr) # Llenar las filas vacias 
+#install.packages("dplyr")
+library(dplyr) # Unir las bases de datos 
+#install.packages("writexl")
+library(writexl) # Guardar base de datos 
+#install.packages("ggrepel")
+library(ggrepel)
+library(ggplot2)
+```
+
+# Recopilación de datos.
+
+```{r, warning=FALSE,message=FALSE}
+# Importación de las bases de datos
+IG_2021_12 <- read_excel(file.choose()) # Importar Archivo ig_2021_12 
+IG_2022_12 <- read_excel(file.choose()) # Importar Archivo ig_2022_12 
+IG_2023_11 <- read_excel(file.choose()) # Importar Archivo ig_2023_11 
+IG_2023_12 <- read_excel(file.choose()) # Importar Archivo ig_2023_12 
+IG_2024_11 <- read_excel(file.choose()) # Importar Archivo ig_2024_11 
+```
+
+## Base de datos (IG_2021_12)
+
+```{r}
+# Organizar base de datos (IG_2021_12)
+
+BD_2021_12 <- IG_2021_12[rowSums(is.na(IG_2021_12)) != ncol(IG_2021_12),]
+BD_2021_12 <- IG_2021_12[-c(1:9,11:12),]
+colnames(BD_2021_12) <- as.character(BD_2021_12[1,])
+BD_2021_12 <- BD_2021_12[-1,]
+colnames(BD_2021_12)[1:3] <- c("Rubro", "Subrubro","Detalle")
+BD_2021_12 <- BD_2021_12 %>% fill(Rubro, Subrubro, .direction = "down") 
+BD_2021_12 <- cbind(Fecha = "01-12-2021",BD_2021_12)
+
+```
+
+## Base de datos (IG_2022_12)
+
+```{r}
+
+# Organizar base de datos (IG_2022_12)
+
+BD_2022_12 <- IG_2022_12[rowSums(is.na(IG_2022_12)) != ncol(IG_2022_12),]
+BD_2022_12 <- IG_2022_12[-c(1:9,11:12),]
+colnames(BD_2022_12) <- as.character(BD_2022_12[1,])
+BD_2022_12 <- BD_2022_12[-1,]
+colnames(BD_2022_12)[1:3] <- c("Rubro", "Subrubro","Detalle")
+BD_2022_12 <- BD_2022_12 %>% fill(Rubro, Subrubro, .direction = "down") 
+BD_2022_12 <- cbind(Fecha = "01-12-2022",BD_2022_12)
+
+```
+
+## Base de datos (IG_2023_11)
+
+```{r}
+
+# Organizar base de datos (IG_2023_11)
+
+BD_2023_11 <- IG_2023_11[rowSums(is.na(IG_2023_11)) != ncol(IG_2023_11),]
+BD_2023_11 <- BD_2023_11[-c(1:9,11:12),]
+colnames(BD_2023_11) <- as.character(BD_2023_11[1,])
+BD_2023_11 <- BD_2023_11[-1,]
+colnames(BD_2023_11)[1:3] <- c("Rubro", "Subrubro","Detalle")
+BD_2023_11 <- BD_2023_11 %>% fill(Rubro, Subrubro, .direction = "down") 
+BD_2023_11 <- cbind(Fecha = "01-11-2023",BD_2023_11)
+```
+
+## Base de datos (IG_2023_12)
+
+```{r}
+# Organizar base de datos (IG_2023_12)
+
+BD_2023_12 <- IG_2023_12[rowSums(is.na(IG_2023_12)) != ncol(IG_2023_12),]
+BD_2023_12 <- BD_2023_12[-c(1:9,11:12),]
+colnames(BD_2023_12) <- as.character(BD_2023_12[1,])
+BD_2023_12 <- BD_2023_12[-1,]
+colnames(BD_2023_12)[1:3] <- c("Rubro", "Subrubro","Detalle")
+BD_2023_12 <- BD_2023_12 %>% fill(Rubro, Subrubro, .direction = "down") 
+BD_2023_12 <- cbind(Fecha = "01-12-2023",BD_2023_12)
+```
+
+## Base de datos (IG_2024_11)
+
+```{r}
+
+# Organizar base de datos (IG_2024_11)
+
+BD_2024_11 <- IG_2024_11[rowSums(is.na(IG_2024_11)) != ncol(IG_2024_11),]
+BD_2024_11 <- BD_2024_11[-c(1:9,11:12),]
+colnames(BD_2024_11) <- as.character(BD_2024_11[1,])
+BD_2024_11 <- BD_2024_11[-1,]
+colnames(BD_2024_11)[1:3] <- c("Rubro", "Subrubro","Detalle")
+BD_2024_11 <- BD_2024_11 %>% fill(Rubro, Subrubro, .direction = "down") 
+BD_2024_11 <- cbind(Fecha = "01-11-2024",BD_2024_11)
+
+```
+
+## Combinación de las Bases de Datos
+
+
+```{r}
+Base_completa <- bind_rows(BD_2021_12, BD_2022_12, BD_2023_11, BD_2023_12, BD_2024_11)
+Base_completa <- Base_completa %>%
+  mutate_at(vars(5:ncol(Base_completa)), as.numeric)
+
+```
+
+
+# Análisis de datos
+
+## Análisis Gráfico de "MIBANCO S.A."
+
+```{r}
+# Filtrar la Base de Datos
+BD_MIBANCO <- as.data.frame(Base_completa[, c("Fecha","Rubro","Subrubro","Detalle","MIBANCO S.A.")])
+head(BD_MIBANCO[-3])
+```
+
+### Gráfica de Ratios Financieros
+
+
+```{r,echo=FALSE}
+# Filtrar por Subrubro y Rubro
+
+BD_MIBANCO_Ratios <- filter(BD_MIBANCO, Subrubro %in% c("UTILIDAD/PATRIMONIO", "UTILIDAD/ACTIVO"))
+BD_MIBANCO_Ratios_f2 <- filter(BD_MIBANCO,
+                                Rubro == "GANANCIAS (EXCEDENTES) Y PÉRDIDAS" &
+                                Subrubro == "OTROS" &
+                                !is.na(`MIBANCO S.A.`))
+
+BD_MIBANCO_Ratios$Fecha <- as.Date(BD_MIBANCO_Ratios$Fecha, format = "%d-%m-%Y")
+BD_MIBANCO_Ratios_f2$Fecha <- as.Date(BD_MIBANCO_Ratios_f2$Fecha, format = "%d-%m-%Y")
+
+# Ordenar los datos por la columna Fecha de menor a mayor
+BD_MIBANCO_Ratios <- BD_MIBANCO_Ratios %>%
+  arrange(Fecha)
+
+BD_MIBANCO_Ratios_f2 <- BD_MIBANCO_Ratios_f2 %>%
+  arrange(Fecha)
+
+BD_MIBANCO_Ratios$Fecha <- as.character(BD_MIBANCO_Ratios$Fecha)
+BD_MIBANCO_Ratios_f2$Fecha <- as.character(BD_MIBANCO_Ratios_f2$Fecha)
+BD_MIBANCO_Ratios$`MIBANCO S.A.`<- BD_MIBANCO_Ratios$`MIBANCO S.A.`*100
+```
+
+```{r}
+BD_MIBANCO_Ratios[,-c(2,4)]
+```
+
+
+```{r,echo=FALSE}
+grafico_lineas <- ggplot(BD_MIBANCO_Ratios, aes(x = Fecha, y = `MIBANCO S.A.`, color = Subrubro, group = Subrubro)) +
+  geom_line(linewidth = 1.5) +  # Línea más gruesa
+  labs(title = "Ratios Financieros MIBANCO S.A.",
+       x = "Años", y = "(%)") +  
+  theme_minimal() +
+  theme(legend.position = "bottom",
+        plot.title = element_text(hjust = 0.5))
+
+print(grafico_lineas)
+
+```
+
+```{r}
+BD_MIBANCO_Ratios_f2[-c(3,4)]
+```
+
+
+```{r, echo=FALSE}
+# Segundo gráfico 
+grafico_barras <- ggplot(BD_MIBANCO_Ratios_f2, aes(x = Fecha, y = `MIBANCO S.A.`, fill = Rubro)) +
+  geom_bar(stat = "identity", width = 0.7, position = "dodge") +
+  labs(title = "Ganancias (Excedentes) y Pérdidas ",
+       x = "Años", y = " (cifras en $ millones COP)") +
+  scale_y_continuous(labels = scales::label_comma()) +
+  theme_minimal() +
+  theme(legend.position = "bottom",
+        plot.title = element_text(hjust = 0.5))
+
+print(grafico_barras)
+
+```
+
+
+### Gráfica Indicador de Morosidad y Deterioro (Deterioro):
+
+```{r,echo=FALSE}
+
+BD_MIBANCO_Moro <- filter(BD_MIBANCO, 
+                          Subrubro %in% c("MOROSIDAD", "DETERIORO (DETERIORO)") &
+                          is.na(Detalle))
+
+BD_MIBANCO_Moro$Fecha <- as.Date(BD_MIBANCO_Moro$Fecha, format = "%d-%m-%Y")
+BD_MIBANCO_Moro <- BD_MIBANCO_Moro %>%
+  arrange(Fecha)
+BD_MIBANCO_Moro$Fecha <- as.character(BD_MIBANCO_Moro$Fecha)
+
+datos_deterioro <- BD_MIBANCO_Moro %>% filter(Subrubro == "DETERIORO (DETERIORO)")
+datos_morosidad <- BD_MIBANCO_Moro %>% filter(Subrubro == "MOROSIDAD")
+datos_morosidad$`MIBANCO S.A.` <- datos_morosidad$`MIBANCO S.A.` * 100
+
+BD_MIBANCO_Moro[-c(2,4)]
+
+```
+
+
+
+```{r,warning=FALSE,echo=FALSE}
+
+# Gráfico combinado
+grafico_combinado <- ggplot() +
+  # Gráfico de barras para DETERIORO (DETERIORO)
+  geom_bar(
+    data = datos_deterioro,
+    aes(x = Fecha, y = `MIBANCO S.A.`, fill = "Deterioro"),
+    stat = "identity", position = "dodge", alpha = 0.8
+  ) +
+  # Gráfico de línea para MOROSIDAD
+  geom_line(
+    data = datos_morosidad,
+    aes(
+      x = Fecha,
+      y = `MIBANCO S.A.` * max(datos_deterioro$`MIBANCO S.A.`, na.rm = TRUE) / max(datos_morosidad$`MIBANCO S.A.`, na.rm = TRUE),
+      group = 1, color = "Morosidad"
+    ),
+    size = 1.2
+  ) +
+  geom_point(
+    data = datos_morosidad,
+    aes(
+      x = Fecha,
+      y = `MIBANCO S.A.` * max(datos_deterioro$`MIBANCO S.A.`, na.rm = TRUE) / max(datos_morosidad$`MIBANCO S.A.`, na.rm = TRUE),
+      color = "Morosidad"
+    ),
+    size = 2
+  ) +
+  # Escalas y etiquetas
+  scale_y_continuous(
+    name = "Deterioro (en $ millones COP)",
+    sec.axis = sec_axis(
+      ~ . * max(datos_morosidad$`MIBANCO S.A.`, na.rm = TRUE) / max(datos_deterioro$`MIBANCO S.A.`, na.rm = TRUE),
+      name = "Morosidad (en %)"
+    )
+  ) +
+  labs(
+    title = "Relacion entre Morosidad y Deterioro en MIBANCO",
+    x = "Fecha",
+    y = NULL
+  ) +
+  scale_fill_manual(name = "Leyenda", values = c("Deterioro" = "skyblue")) +
+  scale_color_manual(name = "Leyenda", values = c("Morosidad" = "red")) +
+  theme_minimal() +
+  theme(
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    plot.title = element_text(hjust = 0.5)
+  )
+
+# Mostrar el gráfico
+print(grafico_combinado)
+
+
+```
+
+
+
+### Gráfica de Intereses Financieros:
+
+```{r,echo=FALSE}
+# Filtrar los datos
+BD_MIBANCO_Intereses <- filter(BD_MIBANCO, Subrubro %in% c("MARGEN NETO DE INTERESES = IFI-GI", "INGRESOS DE INTERESES"))
+BD_MIBANCO_Intereses$Fecha <- as.Date(BD_MIBANCO_Intereses$Fecha, format = "%d-%m-%Y")
+BD_MIBANCO_Intereses <- BD_MIBANCO_Intereses %>%
+  arrange(Fecha)
+BD_MIBANCO_Intereses$Fecha <- as.character(BD_MIBANCO_Intereses$Fecha)
+
+BD_MIBANCO_Intereses[-c(2,4)]
+
+```
+
+
+```{r, echo=FALSE}
+
+# Gráfico de barras
+
+grafico_barras_intereses <- ggplot(BD_MIBANCO_Intereses, aes(x = Fecha, y = `MIBANCO S.A.`, fill = Subrubro)) +
+  geom_bar(stat = "identity", width = 0.7, position = "dodge") +
+  labs(title = "Margen Neto de Intereses e Ingresos de Intereses",
+      y = " (cifras en $ millones COP)") +
+  scale_y_continuous(labels = scales::label_comma()) +
+  theme_minimal() +
+  theme(legend.position = "bottom",
+        plot.title = element_text(hjust = 0.5))
+
+print(grafico_barras_intereses)
+
+```
+
+
+### Composición de Cartera.
+
+```{r,echo=FALSE}
+
+BD_MIBANCO_Cartera <- filter(BD_MIBANCO, Detalle %in% c("CARTERA Y OPERACIONES DE LEASING COMERCIALES", "CARTERA Y OPERACIONES DE LEASING DE CONSUMO", "CARTERA Y LEASING DE MICROCRÉDITOS","CARTERA DE VIVIENDA Y OPERACIONES DE  LEASING HABITACIONAL"))
+
+BD_MIBANCO_Cartera$Fecha <- as.Date(BD_MIBANCO_Cartera$Fecha, format = "%d-%m-%Y")
+
+BD_MIBANCO_Cartera <- BD_MIBANCO_Cartera %>%
+  group_by(Fecha) %>%
+  mutate(Proporcion = `MIBANCO S.A.` / sum(`MIBANCO S.A.`),
+         Etiqueta = paste0(round(Proporcion * 100, 1), "%")) %>%
+  ungroup()
+
+BD_MIBANCO_Cartera[,-c(2,3)]
+
+```
+
+
+```{r, echo=FALSE}
+
+# Gráfico de Torta
+grafico_torta_por_fecha <- ggplot(BD_MIBANCO_Cartera, aes(x = "", y = `MIBANCO S.A.`, fill = Detalle)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar(theta = "y") +
+  geom_label_repel(aes(label = Etiqueta), position = position_stack(vjust = 0.5), size = 3, show.legend = FALSE) +
+  labs(title = "Distribucion de la Cartera de MIBANCO S.A.") +
+  scale_y_continuous(labels = scales::label_comma()) +
+  scale_fill_brewer(palette = "Set3") +
+  theme_void() +
+  theme(
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    plot.title = element_text(hjust = 0.5),  
+    legend.text = element_text(size = 4)) +
+  facet_wrap(~ Fecha, scales = "free_y")
+
+print(grafico_torta_por_fecha)
+
+```
+
+## Descargar Información
+
+```{r}
+#Exportar base de Datos:
+
+#write_xlsx(Base_completa, "Base_completa.xlsx")
+```
+
+
+## Participación del Patrimonio del Emisor frente al Sector
+
+Para el cálculo de la participación de MIBANCO S.A. frente al total del sector "Total Bancos", se filtra el Patrimonio de cada año del Emisor como del Total de los Bancos y se calcula la participación (%) para cada fecha.
+
+
+```{r,echo=FALSE}
+Patrimonio_MIBANCO <- as.data.frame(Base_completa[, c("Fecha", "Rubro", "Subrubro", "Detalle", "Total Bancos", "MIBANCO S.A.")])
+
+
+Patri_MIBANCO_F1 <- Patrimonio_MIBANCO %>%
+  filter(Rubro == "PATRIMONIO" & Subrubro == "OTROS PASIVOS" & is.na(Detalle)) %>%
+  select(-Subrubro, -Detalle)
+
+Patri_MIBANCO_F1$Participacion <- (Patri_MIBANCO_F1$`MIBANCO S.A.`/Patri_MIBANCO_F1$`Total Bancos`)*100
+
+Patri_MIBANCO_F1$Fecha <- as.Date(Patri_MIBANCO_F1$Fecha, format = "%d-%m-%Y")
+Patri_MIBANCO_F1 <- Patri_MIBANCO_F1 %>% arrange(Fecha)
+Patri_MIBANCO_F1$Fecha <- as.character(Patri_MIBANCO_F1$Fecha)
+head(Patri_MIBANCO_F1)
+```
+
+
+```{r, echo=FALSE}
+grafico_patri <- ggplot(Patri_MIBANCO_F1, aes(x = Fecha, y = Participacion)) +
+  geom_bar(stat = "identity", fill = "skyblue", alpha = 0.8, width = 0.7) + 
+  geom_text(aes(label = round(Participacion, 1)), vjust = -0.5, size = 3) +  #
+  labs(
+    title = "Participacion del Patrimonio de MIBANCO en el sector",
+    y = "Participacion (%)"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5)
+  )
+
+# Mostrar el gráfico
+print(grafico_patri)
+
+```
+
+
